@@ -142,10 +142,19 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
                          redirect_stdout=redirect_stdout,
                          redirect_stderr=redirect_stderr)
 
+
     def __enter__(self):
         self.start()
         return self
-        
+
+
+    def start(self) -> None:
+        """Start the progress display."""
+        if not self.disable:
+            if (threading.current_thread() is threading.main_thread() and
+                    not sky_logging.is_silent()):
+                self.live.start(refresh=True)
+
 
     def get_current_task_id(self):
         """returns the task_id currently being processed"""
