@@ -144,7 +144,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
     def __enter__(self):
         global _in_progress
         with self._lock:
-            logger.info('__enter__() _in_progress value: ', _in_progress)
+            logger.info(f'__enter__() _in_progress value: {_in_progress}')
             if not _in_progress:
                 self.start()
                 return self
@@ -154,7 +154,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         """Start the progress display."""
         global _in_progress
         with self._lock:
-            logger.info('start() _in_progress value: ', _in_progress)
+            logger.info(f'start() _in_progress value: {_in_progress}')
             if not self.disable and not _in_progress:
                 self.live.start(refresh=True)
                 _in_progress = True
