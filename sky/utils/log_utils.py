@@ -19,6 +19,8 @@ console = rich_console.Console()
 _status = None
 TaskID = NewType('TaskID', int)
 _in_progress = False
+start = 1
+enter = 1
 
 class _NoOpConsoleStatus:
     """An empty class for multi-threaded console.status."""
@@ -143,26 +145,32 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
 
     def __enter__(self):
         global _in_progress
+        global start
         with self._lock:
-            logger.info(f'__enter__() _in_progress value: {_in_progress}')
-            logger.info(f'__enter__() thread name: {threading.current_thread()}')
+            logger.info(f'{start} __enter__() _in_progress value: {_in_progress}')
+            start += 1
+            logger.info(f'{start} __enter__() _in_progress value: {_in_progress}')
+            logger.info(f'{start} __enter__() thread name: {threading.current_thread()}')
             if not _in_progress:
                 self.start()
                 _in_progress = True
-                logger.info(f'__enter__() set _in_progress to True')
+                logger.info(f'{start} __enter__() set _in_progress to True')
                 return self
 
 
     def start(self) -> None:
         """Start the progress display."""
         global _in_progress
+        global enter
         with self._lock:
-            logger.info(f'start() _in_progress value: {_in_progress}')
-            logger.info(f'start() thread name: {threading.current_thread()}')
+            logger.info(f'{enter} __enter__() _in_progress value: {_in_progress}')
+            enter += 1
+            logger.info(f'{enter} start() _in_progress value: {_in_progress}')
+            logger.info(f'{enter} start() thread name: {threading.current_thread()}')
             if not self.disable and not _in_progress:
                 self.live.start(refresh=True)
                 _in_progress = True
-                logger.info(f'start() set _in_progress to True')
+                logger.info(f'{enter} start() set _in_progress to True')
 
 
     def get_current_task_id(self):
