@@ -67,7 +67,7 @@ def process_subprocess_stream(proc,
     with line_processor:
         with threading.RLock():
             global _NUM_THREAD
-            logger.info(f'log_lib num of thread: {_NUM_THREAD}')
+            logger.info(f'log_lib num of thread: {threading.current_thread()}')
             _NUM_THREAD += 1
             logger.info(f'line_processor object: {line_processor}')
         with open(log_path, 'a') as fout:
@@ -235,6 +235,7 @@ def run_with_log(
         )
         stdout = ''
         stderr = ''
+        logger.info(f'_sync_node line_processor: {line_processor} and thread: {threading.current_thread()}')
 
         if process_stream:
             if skip_lines is None:

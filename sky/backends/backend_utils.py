@@ -27,6 +27,7 @@ from requests import adapters
 from requests.packages.urllib3.util import retry as retry_lib
 import rich.progress as rich_progress
 import yaml
+import threading
 
 import sky
 from sky import authentication as auth
@@ -1180,6 +1181,7 @@ def parallel_data_transfer_to_nodes(
     origin_source = source
 
     def _sync_node(line_processor, runner: 'command_runner.SSHCommandRunner') -> None:
+        logger.info(f'_sync_node line_processor: {line_processor} and thread: {threading.current_thread()}')
         if cmd is not None:
             rc, stdout, stderr = runner.run(cmd,
                                             log_path=log_path,
@@ -1212,6 +1214,7 @@ def parallel_data_transfer_to_nodes(
     with log_utils.RsyncProgressBarProcessor(transient=True,
                              redirect_stdout=False,
                              redirect_stderr=False) as line_processor:
+        logger.info(f'first line_processor: {line_processor}')
         line_processor.set_num_nodes(num_nodes)
         _sync_node_bar = partial(_sync_node, line_processor)
         subprocess_utils.run_in_parallel(_sync_node_bar, runners)
