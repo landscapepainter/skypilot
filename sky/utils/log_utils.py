@@ -18,7 +18,7 @@ logger = sky_logging.init_logger(__name__)
 console = rich_console.Console()
 _status = None
 TaskID = NewType('TaskID', int)
-
+_in_progress = False
 
 class _NoOpConsoleStatus:
     """An empty class for multi-threaded console.status."""
@@ -136,7 +136,6 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         self._tasks: Dict[TaskID, Task] = {}
         self.state = None
         self._task_index = 1
-        self._started = False
         super().__init__(transient=transient,
                          redirect_stdout=redirect_stdout,
                          redirect_stderr=redirect_stderr)
@@ -144,9 +143,9 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
 
     def __enter__(self):
         with self._lock:
-            if not self._started:
+            if not _in_progress:
                 self.start()
-                self._started = True
+                _in_progress = True
                 return self
 
 
