@@ -136,13 +136,14 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         self._tasks: Dict[TaskID, Task] = {}
         self.state = None
         self._task_index = 1
+        self._thread_lock = threading.Lock()
         super().__init__(transient=transient,
                          redirect_stdout=redirect_stdout,
                          redirect_stderr=redirect_stderr)
 
 
     def __enter__(self):
-        with self._lock:
+        with self._thread_lock:
             global _in_progress
             if not _in_progress:
                 self.start()
