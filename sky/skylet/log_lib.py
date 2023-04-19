@@ -66,6 +66,7 @@ def process_subprocess_stream(proc,
     end_streaming_flag = False
     with line_processor:
         with threading.RLock():
+            global _NUM_THREAD
             logger.info(f'log_lib num of thread: {_NUM_THREAD}')
             _NUM_THREAD += 1
             logger.info(f'line_processor object: {line_processor}')
