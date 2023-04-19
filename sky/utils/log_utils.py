@@ -148,13 +148,12 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         global start
         with self._lock:
             logger.info(f'{start} __enter__() _in_progress value: {_in_progress}')
-            start += 1
-            logger.info(f'{start} __enter__() _in_progress value: {_in_progress}')
             logger.info(f'{start} __enter__() thread name: {threading.current_thread()}')
             if not _in_progress:
                 self.start()
                 _in_progress = True
                 logger.info(f'{start} __enter__() set _in_progress to True')
+                start += 1
                 return self
 
 
@@ -163,14 +162,13 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         global _in_progress
         global enter
         with self._lock:
-            logger.info(f'{enter} __enter__() _in_progress value: {_in_progress}')
-            enter += 1
             logger.info(f'{enter} start() _in_progress value: {_in_progress}')
             logger.info(f'{enter} start() thread name: {threading.current_thread()}')
             if not self.disable and not _in_progress:
                 _in_progress = True
                 self.live.start(refresh=True)
                 logger.info(f'{enter} start() set _in_progress to True')
+                enter += 1
 
 
     def get_current_task_id(self):
