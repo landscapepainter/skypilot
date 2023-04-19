@@ -1212,7 +1212,7 @@ def parallel_data_transfer_to_nodes(
     with log_utils.RsyncProgressBarProcessor(transient=True,
                              redirect_stdout=False,
                              redirect_stderr=False) as line_processor:
-        RSYNC_NUM_NODES = num_nodes
+        line_processor.set_num_nodes(num_nodes)
         _sync_node_bar = partial(_sync_node, line_processor)
         subprocess_utils.run_in_parallel(_sync_node_bar, runners)
 
