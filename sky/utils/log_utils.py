@@ -153,9 +153,9 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
             logger.info(f'{start} __enter__() thread name: {threading.current_thread()}')
             if not _in_progress:
                 self.start()
-                logger.info(f'end of {start} __enter__()')
-                start += 1
-                return self
+            logger.info(f'end of {start} __enter__()')
+            start += 1
+            return self
 
 
     def start(self) -> None:
@@ -167,9 +167,10 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
             logger.info(f'{enter} start() thread name: {threading.current_thread()}')
             if not self.disable and not _in_progress:
                 _in_progress = True
+                logger.info(f'{enter} calling live.start()')
                 self.live.start(refresh=True)
-                logger.info(f'end of {enter} start()')
-                enter += 1
+            logger.info(f'end of {enter} start()')
+            enter += 1
 
 
     def get_current_task_id(self):
@@ -280,6 +281,8 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
 
     def __exit__(self, except_type, except_value, traceback):
         del except_type, except_value, traceback  # unused
+        temp = self._EXIT+1
+        logger.info(f'{temp} __exit__() entered')
         with self._lock:
             global _exit
             self._EXIT += 1
