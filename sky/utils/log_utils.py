@@ -12,7 +12,7 @@ import pendulum
 import prettytable
 
 from sky import sky_logging
-from sky.backends import backend_utils
+#from sky.backends import backend_utils
 
 logger = sky_logging.init_logger(__name__)
 
@@ -61,7 +61,6 @@ def safe_rich_progress_bar():
     if _status is None:
         _status = RsyncProgressBarProcessor()
     return _status
-    return _NoOpConsoleStatus()
 
 
 def force_update_rich_status(msg: str):
