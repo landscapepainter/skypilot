@@ -279,8 +279,8 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         with self._lock:
             global _exit
             _exit += 1
-            if backend_utils.RSYNC_NUM_NODES == _exit:
-                self.stop()
+            #if backend_utils.RSYNC_NUM_NODES == _exit:
+                #self.stop()
 
 
 def create_table(field_names: List[str], **kwargs) -> prettytable.PrettyTable:
