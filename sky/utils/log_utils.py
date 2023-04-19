@@ -168,8 +168,8 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
             logger.info(f'{enter} start() _in_progress value: {_in_progress}')
             logger.info(f'{enter} start() thread name: {threading.current_thread()}')
             if not self.disable and not _in_progress:
-                self.live.start(refresh=True)
                 _in_progress = True
+                self.live.start(refresh=True)
                 logger.info(f'{enter} start() set _in_progress to True')
 
 
