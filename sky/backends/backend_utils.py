@@ -15,6 +15,7 @@ import typing
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 from typing_extensions import Literal
 import uuid
+from functools import partial
 
 import colorama
 import filelock
@@ -1177,7 +1178,7 @@ def parallel_data_transfer_to_nodes(
 
     origin_source = source
 
-    def _sync_node(runner: 'command_runner.SSHCommandRunner') -> None:
+    def _sync_node(line_processor, runner: 'command_runner.SSHCommandRunner') -> None:
         if cmd is not None:
             rc, stdout, stderr = runner.run(cmd,
                                             log_path=log_path,
@@ -1198,10 +1199,7 @@ def parallel_data_transfer_to_nodes(
                          up=True,
                          log_path=log_path,
                          stream_logs=stream_logs,
-                         line_processor=log_utils.RsyncProgressBarProcessor(
-                             transient=True,
-                             redirect_stdout=False,
-                             redirect_stderr=False))
+                         line_processor=line_processor)
 
     num_nodes = len(runners)
     plural = 's' if num_nodes > 1 else ''
@@ -1210,7 +1208,11 @@ def parallel_data_transfer_to_nodes(
                f'{style.BRIGHT}{target}{style.RESET_ALL}')
     logger.info(message)
     #with log_utils.safe_rich_status(f'[bold cyan]{action_message}[/]'):
-    subprocess_utils.run_in_parallel(_sync_node, runners)
+    with log_utils.RsyncProgressBarProcessor(transient=True,
+                             redirect_stdout=False,
+                             redirect_stderr=False) as line_processor:
+        _sync_node_bar = partial(_sync_node, line_processor)
+        subprocess_utils.run_in_parallel(_sync_node_bar, runners)
 
 
 def check_local_gpus() -> bool:

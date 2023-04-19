@@ -53,12 +53,10 @@ def safe_rich_status(msg: str):
 
 def safe_rich_progress_bar():
     """A wrapper for multi-threaded console.status."""
-    if (threading.current_thread() is threading.main_thread() and
-            not sky_logging.is_silent()):
-        global _status
-        if _status is None:
-            _status = RsyncProgressBarProcessor()
-        return _status
+    global _status
+    if _status is None:
+        _status = RsyncProgressBarProcessor()
+    return _status
     return _NoOpConsoleStatus()
 
 
@@ -151,9 +149,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
     def start(self) -> None:
         """Start the progress display."""
         if not self.disable:
-            if (threading.current_thread() is threading.main_thread() and
-                    not sky_logging.is_silent()):
-                self.live.start(refresh=True)
+            self.live.start(refresh=True)
 
 
     def get_current_task_id(self):
