@@ -143,6 +143,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
 
     def __enter__(self):
         with self._lock:
+            global _in_progress
             if not _in_progress:
                 self.start()
                 _in_progress = True
