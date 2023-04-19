@@ -148,28 +148,31 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
     def __enter__(self):
         global _in_progress
         global start
+        l_start = start
+        start += 1
         with self._lock:
-            logger.info(f'{start} __enter__() _in_progress value: {_in_progress}')
-            logger.info(f'{start} __enter__() thread name: {threading.current_thread()}')
+            logger.info(f'{l_start} __enter__() _in_progress value: {_in_progress}')
+            logger.info(f'{l_start} __enter__() thread name: {threading.current_thread()}')
             if not _in_progress:
                 self.start()
-            logger.info(f'end of {start} __enter__()')
-            start += 1
-            return self
+            logger.info(f'end of {l_start} __enter__()')
+        return self
 
 
     def start(self) -> None:
         """Start the progress display."""
         global _in_progress
         global enter
+        l_enter = enter
+        enter += 1
         with self._lock:
-            logger.info(f'{enter} start() _in_progress value: {_in_progress}')
-            logger.info(f'{enter} start() thread name: {threading.current_thread()}')
+            logger.info(f'{l_enter} start() _in_progress value: {_in_progress}')
+            logger.info(f'{l_enter} start() thread name: {threading.current_thread()}')
             if not self.disable and not _in_progress:
                 _in_progress = True
-                logger.info(f'{enter} calling live.start()')
+                logger.info(f'{l_enter} calling live.start()')
                 self.live.start(refresh=True)
-            logger.info(f'end of {enter} start()')
+            logger.info(f'end of {l_enter} start()')
             enter += 1
 
 
@@ -286,7 +289,9 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         with self._lock:
             global _exit
             self._EXIT += 1
+            logger.info(f'{self._NUM_NODES} self._NUM_NODES in __exit__()')
             if self._NUM_NODES == self._EXIT:
+                logger.info(f'stopping in __exit__()')
                 self.stop()
 
 

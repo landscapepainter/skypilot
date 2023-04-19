@@ -11,6 +11,7 @@ import time
 import textwrap
 import tempfile
 from typing import Dict, Iterator, List, Optional, Tuple, Union
+import threading
 
 import colorama
 
@@ -22,6 +23,7 @@ from sky.utils import log_utils
 _SKY_LOG_WAITING_GAP_SECONDS = 1
 _SKY_LOG_WAITING_MAX_RETRY = 5
 _SKY_LOG_TAILING_GAP_SECONDS = 0.2
+_NUM_THREAD = 1
 
 logger = sky_logging.init_logger(__name__)
 
@@ -63,6 +65,10 @@ def process_subprocess_stream(proc,
     start_streaming_flag = False
     end_streaming_flag = False
     with line_processor:
+        with threading.RLock():
+            logger.info(f'log_lib num of thread: {_NUM_THREAD}')
+            _NUM_THREAD += 1
+            logger.info(f'line_processor object: {line_processor}')
         with open(log_path, 'a') as fout:
             while len(sel.get_map()) > 0:
                 events = sel.select()
