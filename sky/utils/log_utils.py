@@ -12,6 +12,7 @@ import pendulum
 import prettytable
 
 from sky import sky_logging
+from sky.backends import backend_utils
 
 logger = sky_logging.init_logger(__name__)
 
@@ -19,6 +20,7 @@ console = rich_console.Console()
 _status = None
 TaskID = NewType('TaskID', int)
 _in_progress = False
+_exit = 0
 start = 1
 enter = 1
 
@@ -151,8 +153,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
             logger.info(f'{start} __enter__() thread name: {threading.current_thread()}')
             if not _in_progress:
                 self.start()
-                _in_progress = True
-                logger.info(f'{start} __enter__() set _in_progress to True')
+                logger.info(f'end of {start} __enter__()')
                 start += 1
                 return self
 
@@ -167,7 +168,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
             if not self.disable and not _in_progress:
                 _in_progress = True
                 self.live.start(refresh=True)
-                logger.info(f'{enter} start() set _in_progress to True')
+                logger.info(f'end of {enter} start()')
                 enter += 1
 
 
@@ -276,7 +277,11 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
 
     def __exit__(self, except_type, except_value, traceback):
         del except_type, except_value, traceback  # unused
-        self.stop()
+        with self._lock:
+            global _exit
+            _exit += 1
+            if backend_utils.RSYNC_NUM_NODES == _exit:
+                self.stop()
 
 
 def create_table(field_names: List[str], **kwargs) -> prettytable.PrettyTable:

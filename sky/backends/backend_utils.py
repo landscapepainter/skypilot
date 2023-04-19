@@ -83,6 +83,7 @@ _LAUNCHED_WORKER_PATTERN = re.compile(r'(\d+) ray[._]worker[._]default')
 _LAUNCHING_IP_PATTERN = re.compile(
     r'({}): ray[._]worker[._]default'.format(IP_ADDR_REGEX))
 WAIT_HEAD_NODE_IP_MAX_ATTEMPTS = 3
+RSYNC_NUM_NODES = None
 
 # We use fixed IP address to avoid DNS lookup blocking the check, for machine
 # with no internet connection.
@@ -1211,6 +1212,7 @@ def parallel_data_transfer_to_nodes(
     with log_utils.RsyncProgressBarProcessor(transient=True,
                              redirect_stdout=False,
                              redirect_stderr=False) as line_processor:
+        RSYNC_NUM_NODES = num_nodes
         _sync_node_bar = partial(_sync_node, line_processor)
         subprocess_utils.run_in_parallel(_sync_node_bar, runners)
 
