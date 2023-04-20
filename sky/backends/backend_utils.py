@@ -1215,6 +1215,7 @@ def parallel_data_transfer_to_nodes(
                              redirect_stdout=False,
                              redirect_stderr=False) as line_processor:
         logger.info(f'first line_processor: {line_processor}')
+        logger.info(f'first line_processor num nodes: {num_nodes}')
         line_processor.set_num_nodes(num_nodes)
         _sync_node_bar = partial(_sync_node, line_processor)
         subprocess_utils.run_in_parallel(_sync_node_bar, runners)
