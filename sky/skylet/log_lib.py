@@ -24,6 +24,9 @@ _SKY_LOG_WAITING_GAP_SECONDS = 1
 _SKY_LOG_WAITING_MAX_RETRY = 5
 _SKY_LOG_TAILING_GAP_SECONDS = 0.2
 _NUM_THREAD = 1
+_NODE_COUNT_DICT = {}
+_NODE_COUNTER = 1
+_TASK_ID_DICT = {}
 
 logger = sky_logging.init_logger(__name__)
 
@@ -40,6 +43,7 @@ def process_subprocess_stream(proc,
                               streaming_prefix: Optional[str] = None,
                               source: Optional[str] = None) -> Tuple[str, str]:
     """Redirect the process's filtered stdout/stderr to both stream and file"""
+    global _NODE_COUNT_DICT, _NODE_COUNTER
     if line_processor is None:
         line_processor = log_utils.LineProcessor()
 
@@ -119,8 +123,13 @@ def process_subprocess_stream(proc,
                             temp_path = os.path.join(source, line[:-1])
                             if os.path.isfile(temp_path):
                                 file_path = temp_path
+                                with threading.RLock():
+                                    line_processor_str = str(line_processor)
+                                    if line_processor_str not in _NODE_COUNT_DICT:
+                                        _NODE_COUNT_DICT[line_processor_str] = _NODE_COUNTER
+                                        _NODE_COUNTER += 1
                                 task_id = line_processor.add_task(
-                                    f'[bold cyan]{file_path}[/]', total=100)
+                                    f'[bold cyan]Node {_NODE_COUNT_DICT[line_processor_str]}: {file_path}[/]', total=100)
                             else:
                                 task_id = line_processor.get_current_task_id()
                                 if task_id:
