@@ -81,9 +81,9 @@ def process_subprocess_stream(proc,
     with line_processor:
         with threading.RLock():
             global _NUM_THREAD
-            logger.info(f'log_lib num of thread: {threading.current_thread()}')
+            logger.info(f'log_lib process subprocess stream num of thread: {threading.current_thread()}')
             _NUM_THREAD += 1
-            logger.info(f'line_processor object: {line_processor}')
+            logger.info(f'log_lib process subprocess stream line_processor object: {line_processor}')
         with open(log_path, 'a') as fout:
             while len(sel.get_map()) > 0:
                 events = sel.select()
@@ -186,6 +186,7 @@ def run_with_log(
     assert process_stream or not require_outputs, (
         process_stream, require_outputs,
         'require_outputs should be False when process_stream is False')
+    logger.info(f'log_lib run_with_log line_processor: {line_processor} and thread: {threading.current_thread()}')
 
     log_path = os.path.expanduser(log_path)
     dirname = os.path.dirname(log_path)
