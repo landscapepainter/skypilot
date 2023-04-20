@@ -27,6 +27,8 @@ _NUM_THREAD = 1
 _NODE_COUNT_DICT = {}
 _NODE_COUNTER = 1
 _TASK_ID_DICT = {}
+_FIRST_THREAD = True
+_FIRST_PROGRESS_BAR = None
 
 logger = sky_logging.init_logger(__name__)
 
@@ -43,9 +45,17 @@ def process_subprocess_stream(proc,
                               streaming_prefix: Optional[str] = None,
                               source: Optional[str] = None) -> Tuple[str, str]:
     """Redirect the process's filtered stdout/stderr to both stream and file"""
-    global _NODE_COUNT_DICT, _NODE_COUNTER
+    global _NODE_COUNT_DICT, _NODE_COUNTER, _FIRST_PROGRESS_BAR
     if line_processor is None:
         line_processor = log_utils.LineProcessor()
+
+    if isinstance(line_processor, log_utils.RsyncProgressBarProcessor):
+        with threading.RLock():
+            node_count = _NODE_COUNTER
+            _NODE_COUNTER += 1
+        if not _FIRST_PROGRESS_BAR:
+            _FIRST_PROGRESS_BAR = line_processor
+        line_processor = _FIRST_PROGRESS_BAR
 
     sel = selectors.DefaultSelector()
     out_io = io.TextIOWrapper(proc.stdout,
@@ -123,13 +133,8 @@ def process_subprocess_stream(proc,
                             temp_path = os.path.join(source, line[:-1])
                             if os.path.isfile(temp_path):
                                 file_path = temp_path
-                                with threading.RLock():
-                                    line_processor_str = str(line_processor)
-                                    if line_processor_str not in _NODE_COUNT_DICT:
-                                        _NODE_COUNT_DICT[line_processor_str] = _NODE_COUNTER
-                                        _NODE_COUNTER += 1
                                 task_id = line_processor.add_task(
-                                    f'[bold cyan]Node {_NODE_COUNT_DICT[line_processor_str]}: {file_path}[/]', total=100)
+                                    f'[bold cyan]Node {node_count}: {file_path}[/]', total=100)
                             else:
                                 task_id = line_processor.get_current_task_id()
                                 if task_id:
