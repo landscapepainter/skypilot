@@ -1211,14 +1211,14 @@ def parallel_data_transfer_to_nodes(
                f'{style.BRIGHT}{target}{style.RESET_ALL}')
     logger.info(message)
     #with log_utils.safe_rich_status(f'[bold cyan]{action_message}[/]'):
-    with log_utils.RsyncProgressBarProcessor(transient=True,
+    line_processor = log_utils.RsyncProgressBarProcessor(transient=True,
                              redirect_stdout=False,
-                             redirect_stderr=False) as line_processor:
-        logger.info(f'first line_processor: {line_processor}')
-        logger.info(f'first line_processor num nodes: {num_nodes}')
-        line_processor.set_num_nodes(num_nodes)
-        _sync_node_bar = partial(_sync_node, line_processor)
-        subprocess_utils.run_in_parallel(_sync_node_bar, runners)
+                             redirect_stderr=False)
+    logger.info(f'first line_processor: {line_processor}')
+    logger.info(f'first line_processor num nodes: {num_nodes}')
+    line_processor.set_num_nodes(num_nodes)
+    _sync_node_bar = partial(_sync_node, line_processor)
+    subprocess_utils.run_in_parallel(_sync_node_bar, runners)
 
 
 def check_local_gpus() -> bool:
