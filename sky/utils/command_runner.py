@@ -314,6 +314,8 @@ class SSHCommandRunner:
         # to get a total progress bar, but it requires rsync>=3.1.0 and Mac
         # OS has a default rsync==2.6.9 (16 years old).
         logger.info(f'command_runner rsync line_processor: {line_processor} and thread: {threading.current_thread()}')
+        logger.info(f'command_runner current process: {os.getpid()}')
+
         rsync_command = ['rsync', RSYNC_DISPLAY_OPTION]
 
         # --filter
