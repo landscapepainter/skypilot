@@ -56,7 +56,7 @@ def process_subprocess_stream(proc,
         if not _FIRST_PROGRESS_BAR:
             _FIRST_PROGRESS_BAR = line_processor
         line_processor = _FIRST_PROGRESS_BAR
-
+    
     sel = selectors.DefaultSelector()
     out_io = io.TextIOWrapper(proc.stdout,
                               encoding='utf-8',
@@ -72,7 +72,7 @@ def process_subprocess_stream(proc,
 
     stdout = ''
     stderr = ''
-
+    stream_logs = True
     if streaming_prefix is None:
         streaming_prefix = ''
 
