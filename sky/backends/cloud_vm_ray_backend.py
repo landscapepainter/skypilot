@@ -17,6 +17,7 @@ import textwrap
 import time
 import typing
 from typing import Dict, Iterable, List, Optional, Tuple, Union, Set
+from functools import partial
 
 import colorama
 import filelock
@@ -2415,16 +2416,13 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
         runners = command_runner.SSHCommandRunner.make_runner_list(
             ip_list, **ssh_credentials)
 
-        def _sync_workdir_node(runner: command_runner.SSHCommandRunner) -> None:
+        def _sync_workdir_node(line_processor, runner: command_runner.SSHCommandRunner) -> None:
             runner.rsync(source=workdir,
                          target=SKY_REMOTE_WORKDIR,
                          up=True,
                          log_path=log_path,
                          stream_logs=False,
-                         line_processor=log_utils.RsyncProgressBarProcessor(
-                             transient=True,
-                             redirect_stdout=False,
-                             redirect_stderr=False))
+                         line_processor=line_processor)
 
         num_nodes = handle.launched_nodes
         plural = 's' if num_nodes > 1 else ''
@@ -2437,7 +2435,15 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
         logger.info('To view detailed progress: '
                     f'{style.BRIGHT}{tail_cmd}{style.RESET_ALL}')
         #with log_utils.safe_rich_status('[bold cyan]Syncing[/]'):
-        subprocess_utils.run_in_parallel(_sync_workdir_node, runners)
+        with log_utils.RsyncProgressBarProcessor(transient=True,
+                                redirect_stdout=False,
+                                redirect_stderr=False) as line_processor:
+            logger.info(f'first line_processor: {line_processor}')
+            logger.info(f'first line_processor num nodes: {num_nodes}')
+            line_processor.set_num_nodes(num_nodes)
+            _sync_workdir_node_bar = partial(_sync_workdir_node, line_processor)
+            subprocess_utils.run_in_parallel(_sync_workdir_node_bar, runners)
+
 
     def _sync_file_mounts(
         self,
