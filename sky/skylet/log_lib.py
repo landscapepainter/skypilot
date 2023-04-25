@@ -142,8 +142,7 @@ def process_subprocess_stream(proc,
                                     line_processor.update(task_id,
                                                           line,
                                                           refresh=True)
-                                    line_processor.remove_task_if_complete(
-                                        task_id)
+                                    #line_processor.remove_task_if_complete(task_id)
                     else:
                         line_processor.process_line(line)
     return stdout, stderr

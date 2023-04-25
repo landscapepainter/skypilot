@@ -290,6 +290,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
             global _exit
             self._EXIT += 1
             logger.info(f'{self._NUM_NODES} self._NUM_NODES in __exit__()')
+            logger.info(f'{self._EXIT} self._EXIT in __exit__()')
             if self._NUM_NODES == self._EXIT:
                 logger.info(f'stopping in __exit__()')
                 self.stop()
