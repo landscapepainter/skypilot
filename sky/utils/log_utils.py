@@ -140,6 +140,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         self._tasks: Dict[TaskID, Task] = {}
         self.state = None
         self._task_index = 1
+        self._current_thread_task_id = {}
         super().__init__(transient=transient,
                          redirect_stdout=redirect_stdout,
                          redirect_stderr=redirect_stderr)
@@ -175,12 +176,21 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
             logger.info(f'end of {l_enter} start()')
             enter += 1
 
+    """
+    def get_current_task_id(self):
+        """"""returns the task_id currently being processed""""""
+        with self._lock:
+            if self.current_task_id:
+                return self.current_task_id
+            return None
+    """
 
     def get_current_task_id(self):
         """returns the task_id currently being processed"""
-        if self.current_task_id:
-            return self.current_task_id
-        return None
+        with self._lock:
+            if self._current_thread_task_id[threading.current_thread()]:
+                return self._current_thread_task_id[threading.current_thread()]
+            return None
 
     def add_task(
         self,
@@ -221,7 +231,8 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
             if start:
                 self.start_task(self._task_index)
             new_task_index = self._task_index
-            self.current_task_id = new_task_index
+            self._current_thread_task_id[threading.current_thread()] = new_task_index
+            #self.current_task_id = new_task_index
             self._task_index = TaskID(int(self._task_index) + 1)
         self.refresh()
         return new_task_index
