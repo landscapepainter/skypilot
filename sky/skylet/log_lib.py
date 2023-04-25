@@ -123,7 +123,8 @@ def process_subprocess_stream(proc,
                         out_stream.write(streaming_prefix + line)
                         out_stream.flush()
                     if log_path != '/dev/null':
-                        line = node_count + '   ' + line
+                        if isinstance(line_processor, log_utils.RsyncProgressBarProcessor):
+                            line = node_count + '   ' + line
                         fout.write(line)
                         fout.flush()
                     if isinstance(line_processor,
