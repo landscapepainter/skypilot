@@ -275,6 +275,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         Args:
             task_id (TaskID): A task ID.
         """
+        # This removes the progress bar from the terminal when it's completed
         with self._lock:
             if task_id in self._tasks and self._tasks[task_id].completed == 100:
                 del self._tasks[task_id]
@@ -287,11 +288,10 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         temp = self._EXIT+1
         logger.info(f'{temp} __exit__() entered')
         with self._lock:
-            global _exit
             self._EXIT += 1
             logger.info(f'{self._NUM_NODES} self._NUM_NODES in __exit__()')
             logger.info(f'{self._EXIT} self._EXIT in __exit__()')
-            if self._NUM_NODES == self._EXIT:
+            if self._NUM_NODES + 1 == self._EXIT:
                 logger.info(f'stopping in __exit__()')
                 self.stop()
 
