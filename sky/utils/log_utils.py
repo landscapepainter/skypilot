@@ -138,7 +138,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
                  redirect_stderr: bool = True):
         self.current_task_id = None
         self._tasks: Dict[TaskID, Task] = {}
-        self.state = None
+        self.started = set()
         self._task_index = TaskID(1)
         self._current_thread_task_id = {}
         super().__init__(transient=transient,
@@ -175,6 +175,19 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
                 self.live.start(refresh=True)
             logger.info(f'end of {l_enter} start()')
             enter += 1
+
+
+    def set_start(self) -> None:
+        """set the current progress bar to start processing"""
+        self.started.add(str(threading.current_thread().ident))
+
+
+    def started(self) -> bool:
+        """checks if the progress bar started processing"""
+        if str(threading.current_thread().ident) in self.started:
+            return True
+        return False
+
 
     """
     def get_current_task_id(self):
@@ -293,8 +306,11 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
             if task_id in self._tasks and self._tasks[task_id].completed == 100:
                 del self._tasks[task_id]
 
+
     def set_num_nodes(self, num_nodes: int) -> None:
-        self._NUM_NODES = num_nodes
+        with self._lock:
+            self._NUM_NODES = num_nodes
+
 
     def __exit__(self, except_type, except_value, traceback):
         del except_type, except_value, traceback  # unused

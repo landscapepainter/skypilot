@@ -24,11 +24,7 @@ _SKY_LOG_WAITING_GAP_SECONDS = 1
 _SKY_LOG_WAITING_MAX_RETRY = 5
 _SKY_LOG_TAILING_GAP_SECONDS = 0.2
 _NUM_THREAD = 1
-_NODE_COUNT_DICT = {}
 _NODE_COUNTER = 1
-_TASK_ID_DICT = {}
-_FIRST_THREAD = True
-_FIRST_PROGRESS_BAR = None
 
 logger = sky_logging.init_logger(__name__)
 
@@ -45,19 +41,15 @@ def process_subprocess_stream(proc,
                               streaming_prefix: Optional[str] = None,
                               source: Optional[str] = None) -> Tuple[str, str]:
     """Redirect the process's filtered stdout/stderr to both stream and file"""
-    global _NODE_COUNT_DICT, _NODE_COUNTER, _FIRST_PROGRESS_BAR
+    global _NODE_COUNTER
     if line_processor is None:
         line_processor = log_utils.LineProcessor()
 
-    if isinstance(line_processor, log_utils.RsyncProgressBarProcessor):
+    elif isinstance(line_processor, log_utils.RsyncProgressBarProcessor):
         with threading.RLock():
             node_count = _NODE_COUNTER
             _NODE_COUNTER += 1
-        '''
-        if not _FIRST_PROGRESS_BAR:
-            _FIRST_PROGRESS_BAR = line_processor
-        line_processor = _FIRST_PROGRESS_BAR
-        '''
+
     sel = selectors.DefaultSelector()
     out_io = io.TextIOWrapper(proc.stdout,
                               encoding='utf-8',
@@ -133,8 +125,8 @@ def process_subprocess_stream(proc,
                     if isinstance(line_processor,
                                   log_utils.RsyncProgressBarProcessor):
                         if './\n' == line:
-                            line_processor.state = line_processor.Status.LOG
-                        elif line_processor.state == line_processor.Status.LOG:
+                            line_processor.set_start()
+                        elif line_processor.started():
                             # line[:-1] ignores the \n at the end of the string
                             temp_path = os.path.join(source, line[:-1])
                             if os.path.isfile(temp_path):
