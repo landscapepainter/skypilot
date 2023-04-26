@@ -139,7 +139,7 @@ class RsyncProgressBarProcessor(LineProcessor, Progress):
         self.current_task_id = None
         self._tasks: Dict[TaskID, Task] = {}
         self.state = None
-        self._task_index = 1
+        self._task_index = TaskID(1)
         self._current_thread_task_id = {}
         super().__init__(transient=transient,
                          redirect_stdout=redirect_stdout,

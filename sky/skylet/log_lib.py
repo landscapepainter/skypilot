@@ -124,9 +124,12 @@ def process_subprocess_stream(proc,
                         out_stream.flush()
                     if log_path != '/dev/null':
                         if isinstance(line_processor, log_utils.RsyncProgressBarProcessor):
-                            line = str(node_count) + '   ' + line
-                        fout.write(line)
-                        fout.flush()
+                            log_line = str(node_count) + '  dog  ' + line
+                            fout.write(log_line)
+                            fout.flush()
+                        else:
+                            fout.write(line)
+                            fout.flush()
                     if isinstance(line_processor,
                                   log_utils.RsyncProgressBarProcessor):
                         if './\n' == line:
