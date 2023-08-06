@@ -4,11 +4,15 @@
 
 import functools
 import os
+import subprocess
+import time
 
 from sky.utils import ux_utils, env_options
 
 kubernetes = None
 urllib3 = None
+
+LOCAL_PORT_FOR_PORT_FORWARD = 23100
 
 _configured = False
 _core_api = None
@@ -135,3 +139,21 @@ def config_exception():
 @import_package
 def max_retry_error():
     return urllib3.exceptions.MaxRetryError
+
+class PortForward(object):
+    def __init__(self, cluster_name):
+        #self.portforward_cmd = f'kubectl port-forward svc/{cluster_name}-ray-head-ssh {LOCAL_PORT_FOR_PORT_FORWARD}:22'
+        #self.portforward_cmd = ['kubectl', 'port-forward', f'svc/{cluster_name}-ray-head-ssh', f'{LOCAL_PORT_FOR_PORT_FORWARD}:22']
+        self.portforward_cmd = ['kubectl', 'port-forward', f'svc/sshjump-075a4921', f'{LOCAL_PORT_FOR_PORT_FORWARD}:22']
+        self.cluster_name = cluster_name
+
+    def __enter__(self):
+        subprocess.Popen(self.portforward_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,)
+        # Allowing time to run port-forward
+        time.sleep(1)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        output = subprocess.run(['pgrep', '-f', f'svc/sshjump-075a4921'], stdout=subprocess.PIPE)
+        pid = output.stdout.decode('utf-8').strip()
+        subprocess.run(['kill', '-9', str(pid)])
+        del exc_type, exc_val, exc_tb  # unused

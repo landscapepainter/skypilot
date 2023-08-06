@@ -3839,6 +3839,9 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
                 command, such as replacing or skipping lines on the fly. If
                 enabled, lines are printed only when '\r' or '\n' is found.
         """
+        #if isinstance(handle.launched_resources.cloud, clouds.Kubernetes):
+        #    head_ip = 
+        #else:
         head_ip = backend_utils.get_head_ip(handle, _FETCH_IP_MAX_ATTEMPTS)
         head_ssh_port = backend_utils.get_head_ssh_port(handle,
                                                         _FETCH_IP_MAX_ATTEMPTS)

@@ -101,6 +101,70 @@ def ssh_options_list(ssh_private_key: Optional[str],
     ]
 
 
+def ssh_options_list(ssh_private_key: Optional[str],
+                     ssh_control_name: Optional[str],
+                     *,
+                     ssh_proxy_command: Optional[str] = None,
+                     timeout: int = 30,
+                     port: int = 22) -> List[str]:
+    """Returns a list of sane options for 'ssh'."""
+    # Forked from Ray SSHOptions:
+    # https://github.com/ray-project/ray/blob/master/python/ray/autoscaler/_private/command_runner.py
+    arg_dict = {
+        # SSH port
+        'Port': port,
+        # Supresses initial fingerprint verification.
+        'StrictHostKeyChecking': 'no',
+        # SSH IP and fingerprint pairs no longer added to known_hosts.
+        # This is to remove a 'REMOTE HOST IDENTIFICATION HAS CHANGED'
+        # warning if a new node has the same IP as a previously
+        # deleted node, because the fingerprints will not match in
+        # that case.
+        'UserKnownHostsFile': os.devnull,
+        # Try fewer extraneous key pairs.
+        'IdentitiesOnly': 'yes',
+        # Abort if port forwarding fails (instead of just printing to
+        # stderr).
+        'ExitOnForwardFailure': 'yes',
+        # Quickly kill the connection if network connection breaks (as
+        # opposed to hanging/blocking).
+        'ServerAliveInterval': 5,
+        'ServerAliveCountMax': 3,
+        # ConnectTimeout.
+        'ConnectTimeout': f'{timeout}s',
+        # Agent forwarding for git.
+        'ForwardAgent': 'yes',
+    }
+    if ssh_control_name is not None:
+        arg_dict.update({
+            # Control path: important optimization as we do multiple ssh in one
+            # sky.launch().
+            'ControlMaster': 'auto',
+            'ControlPath': f'{_ssh_control_path(ssh_control_name)}/%C',
+            'ControlPersist': '300s',
+        })
+    ssh_key_option = [
+        '-i',
+        ssh_private_key,
+    ] if ssh_private_key is not None else []
+
+    if ssh_proxy_command is not None:
+        logger.debug(f'--- Proxy: {ssh_proxy_command} ---')
+
+        arg_dict.update({
+            # Due to how log_lib.run_with_log() works (using shell=True) we
+            # must quote this value.
+            'ProxyCommand': shlex.quote(ssh_proxy_command),
+        })
+        ssh_key_option += ['-o', f'ProxyCommand={ssh_proxy_command}']
+        del arg_dict["ProxyCommand"]
+    return ssh_key_option + [
+        x for y in (['-o', f'{k}={v}']
+                    for k, v in arg_dict.items()
+                    if v is not None) for x in y
+    ]
+
+
 class SshMode(enum.Enum):
     """Enum for SSH mode."""
     # Do not allocating pseudo-tty to avoid user input corrupting outputs.

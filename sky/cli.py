@@ -3803,6 +3803,29 @@ def spot_dashboard(port: Optional[int]):
             click.echo('Exiting.')
 
 
+@cli.command(cls=_DocumentedCodeCommand)
+@click.argument('cluster',
+                required=False,
+                type=str,
+                nargs=-1,
+                **_get_shell_complete_args(_complete_file_name))
+@usage_lib.entrypoint
+def ssh(cluster: str):
+    from sky.adaptors import kubernetes
+    handle = global_user_state.get_handle_from_cluster_name(cluster[0])
+    
+    backend = backends.CloudVmRayBackend()
+    if not isinstance(backend, backends.CloudVmRayBackend):
+        raise click.UsageError('Interactive nodes are only supported for '
+                               f'{backends.CloudVmRayBackend.__name__} '
+                               f'backend. Got {type(backend).__name__}.')
+    with kubernetes.PortForward(cluster[0]):
+        backend.run_on_head(handle,
+                            cmd=[],
+                            port_forward=(),
+                            ssh_mode=command_runner.SshMode.LOGIN)
+    
+
 # ==============================
 # Sky Benchmark CLIs
 # ==============================

@@ -440,7 +440,8 @@ def setup_kubernetes_authentication(config: Dict[str, Any]) -> Dict[str, Any]:
         logger.info(
             f'Creating SSH Jump Service {sshjump_name} in the cluster...')
 
-    ssh_jump_port = clouds.Kubernetes.get_port(sshjump_name, 'default')
+    #ssh_jump_port = clouds.Kubernetes.get_port(sshjump_name, 'default')
+    ssh_jump_port = kubernetes.LOCAL_PORT_FOR_PORT_FORWARD
     ssh_jump_ip = clouds.Kubernetes.get_external_ip()
 
     config['auth']['ssh_proxy_command'] = \
