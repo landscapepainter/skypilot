@@ -9,6 +9,7 @@ import time
 from typing import List, Optional, Tuple, Union
 
 from sky import sky_logging
+from sky import skypilot_config
 from sky.utils import common_utils, subprocess_utils
 from sky.skylet import log_lib
 
@@ -74,7 +75,8 @@ def ssh_options_list(ssh_private_key: Optional[str],
         # Agent forwarding for git.
         'ForwardAgent': 'yes',
     }
-    if ssh_control_name is not None:
+    ssh_setup_mode = skypilot_config.get_nested(('kubernetes', 'networking'), None)
+    if ssh_control_name is not None and ssh_setup_mode != 'port-forward':
         arg_dict.update({
             # Control path: important optimization as we do multiple ssh in one
             # sky.launch().

@@ -1706,7 +1706,6 @@ class RetryingVmProvisioner(object):
         # waits for all workers; turn it into real gang scheduling.
         # FIXME: refactor code path to remove use of stream_logs
         del stream_logs
-
         def ray_up():
             # Runs `ray up <kwargs>` with our monkey-patched launch hash
             # calculation. See the monkey patch file for why.
@@ -3838,7 +3837,7 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
             process_stream: Whether to post-process the stdout/stderr of the
                 command, such as replacing or skipping lines on the fly. If
                 enabled, lines are printed only when '\r' or '\n' is found.
-        """
+        """    
         head_ip = backend_utils.get_head_ip(handle, _FETCH_IP_MAX_ATTEMPTS)
         head_ssh_port = backend_utils.get_head_ssh_port(handle,
                                                         _FETCH_IP_MAX_ATTEMPTS)
@@ -3849,7 +3848,7 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
                                                  **ssh_credentials)
         if under_remote_workdir:
             cmd = f'cd {SKY_REMOTE_WORKDIR} && {cmd}'
-
+        
         return runner.run(
             cmd,
             port_forward=port_forward,

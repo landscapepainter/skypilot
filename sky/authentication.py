@@ -392,7 +392,7 @@ def _get_kubernetes_proxy_command(ingress, ipaddress, ssh_setup_mode):
         j2_template = jinja2.Template(template)
         _content = j2_template.render(ssh_jump_name=ssh_jump_name, timeout=timeout, ipaddress=ipaddress, local_port=ingress)
         """
-        port_forward_proxy_cmd_path = os.path.expnaduser(kubernetes.PORT_FORWARD_PROXY_CMD_PATH)
+        port_forward_proxy_cmd_path = os.path.expanduser(kubernetes.PORT_FORWARD_PROXY_CMD_PATH)
         """
         with open(port_forward_proxy_cmd_path, 'w') as fout:
             fout.write(_content)
@@ -406,6 +406,7 @@ def _get_kubernetes_proxy_command(ingress, ipaddress, ssh_setup_mode):
         backend_utils.fill_template(kubernetes.PORT_FORWARD_PROXY_CMD_TEMPLATE,
                                     vars_to_fill,
                                     output_path=port_forward_proxy_cmd_path)
+        os.chmod(port_forward_proxy_cmd_path, os.stat(port_forward_proxy_cmd_path).st_mode | 0o111)
         proxy_command = 'ssh -tt -i {privkey} -o ProxyCommand=\'{port_forward_proxy_cmd_path}\' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o IdentitiesOnly=yes -p {ingress} -W %h:%p sky@{ipaddress}'.format(
             privkey=PRIVATE_SSH_KEY_PATH, ingress=ingress, ipaddress=ipaddress, port_forward_proxy_cmd_path=port_forward_proxy_cmd_path)
     else:

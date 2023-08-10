@@ -57,7 +57,6 @@ def _handle_io_stream(io_stream, out_stream, args: _ProcessingArgs):
                               newline='',
                               errors='replace',
                               write_through=True)
-
     start_streaming_flag = False
     end_streaming_flag = False
     streaming_prefix = args.streaming_prefix if args.streaming_prefix else ''
@@ -163,7 +162,6 @@ def run_with_log(
     assert process_stream or not require_outputs, (
         process_stream, require_outputs,
         'require_outputs should be False when process_stream is False')
-
     log_path = os.path.expanduser(log_path)
     dirname = os.path.dirname(log_path)
     if use_sudo:
@@ -251,9 +249,10 @@ def run_with_log(
                     line_processor=line_processor,
                     # Replace CRLF when the output is logged to driver by ray.
                     replace_crlf=with_ray,
-                    streaming_prefix=streaming_prefix,
+                    streaming_prefix=streaming_prefix
                 )
                 stdout, stderr = process_subprocess_stream(proc, args)
+            
             proc.wait()
             if require_outputs:
                 return proc.returncode, stdout, stderr
