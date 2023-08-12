@@ -75,6 +75,7 @@ def ssh_options_list(ssh_private_key: Optional[str],
         # Agent forwarding for git.
         'ForwardAgent': 'yes',
     }
+    """
     ssh_setup_mode = skypilot_config.get_nested(('kubernetes', 'networking'), None)
     if ssh_control_name is not None and ssh_setup_mode != 'port-forward':
         arg_dict.update({
@@ -84,6 +85,7 @@ def ssh_options_list(ssh_private_key: Optional[str],
             'ControlPath': f'{_ssh_control_path(ssh_control_name)}/%C',
             'ControlPersist': '300s',
         })
+    """
     ssh_key_option = [
         '-i',
         ssh_private_key,
