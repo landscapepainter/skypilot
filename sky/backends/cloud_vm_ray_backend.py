@@ -3724,7 +3724,8 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
         stdout = ''
         stderr = ''
 
-        # Use the new provisioner for AWS.
+        # Use the new provisioner for AWS, GCP and Lambda Cloud.
+        #if isinstance(cloud, (clouds.AWS, clouds.GCP, clouds.Lambda)):
         if isinstance(cloud, (clouds.AWS, clouds.GCP)):
             # Stop the ray autoscaler first to avoid the head node trying to
             # re-launch the worker nodes, during the termination of the
@@ -3743,6 +3744,9 @@ class CloudVmRayBackend(backends.Backend['CloudVmRayResourceHandle']):
                         'Failed to take down Ray autoscaler on the head node. '
                         'It might be because the cluster\'s head node has '
                         'already been terminated. It is fine to skip this.')
+            
+            # Lambda instances does not support 'stop'
+            #if not isinstance(clouds.Lambda): 
             operation_fn = provision_lib.stop_instances
             if terminate:
                 operation_fn = provision_lib.terminate_instances
