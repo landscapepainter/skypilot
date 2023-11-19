@@ -819,6 +819,10 @@ class Storage(object):
             logger.error(f'Could not initialize {store_type} store with '
                          f'name {self.name}. General initialization error.')
             raise
+        except exceptions.StorageSpecError:
+            logger.error(f'Could not mount externally created {store_type}'
+                         f'store with name {self.name!r}.')
+            raise
 
         # Add store to storage
         self._add_store(store)
